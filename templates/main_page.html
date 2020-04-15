@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Kitzboi</title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.css"/>
+    <script type='text/javascript' src="/static/js/bootstrap.js"></script>
+    <script type='text/javascript' src="/static/js/bootstrap.bundle.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+          $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+</head>
+<body>
+    <div id="top-page" align="center">
+        <h3 class="display-3">News Portal</h3>
+    </div>
+    <br>
+    <div class="container" id="content">
+        <div class="row justify-content-around">
+            {% for site, news_items in data.items() %}
+            <div class="col col-md-5">
+                <h5 class="display-5" align="center" >{{ site }}</h5>
+                {% for item in news_items %}
+                <div class="row">
+                    <div class="col col-md-10" style="border-bottom: 1px solid #eeeded;">
+                        <a style="text-decoration: none; color: black;"
+                           href="{{item.link}}" target="_blank" data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{item.summary}}</em>">
+                            {{item.headline}}
+                        </a>
+                    </div>
+                    <div class="col col-md-2" style="text-align: right;">
+                        <em style="font-size: 12px;">{{item.publish_time[11:16]}}</em>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
