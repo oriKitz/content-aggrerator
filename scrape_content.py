@@ -28,8 +28,7 @@ def get_ynet_article_date(link):
         publish_time = publish_time[publish_time.find(':') + 1:]
     except:
         try:
-            publish_time = article_html.find(attrs={'class': 'author-small'}).string.splitlines()[2].strip().replace(
-                '|', '')
+            publish_time = article_html.find(attrs={'class': 'author-small'}).string.splitlines()[2].strip().replace('|', '')
         except:
             try:
                 publish_time = article_html.find(attrs={'class': 'date'}).contents[1]
