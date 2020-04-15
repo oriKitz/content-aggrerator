@@ -9,6 +9,13 @@ DB = 'news.db'
 TABLE_NAME = 'top_stories'
 
 
+def running_message_decorator(func):
+    def messager():
+        func()
+        print(f'finished running {func.__name__} at {datetime.datetime.now()}')
+    return messager
+
+
 def ts_to_datetime(ts):
     return datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ts)
 
@@ -81,6 +88,7 @@ def scrape_ynet_secondary_articles(html):
     return news_items
 
 
+@running_message_decorator
 def scrape_ynet():
     res = requests.get('https://www.ynet.co.il/home/0,7340,L-8,00.html')
     html = BeautifulSoup(res.text, 'html.parser')
@@ -92,6 +100,7 @@ def scrape_ynet():
         news_item.update_db()
 
 
+@running_message_decorator
 def scrape_techcrunch_items():
     res = requests.get('https://techcrunch.com')
     h = BeautifulSoup(res.text, 'html.parser')
@@ -107,6 +116,7 @@ def scrape_techcrunch_items():
         news_item.update_db()
 
 
+@running_message_decorator
 def scrape_bbc_news():
     res = requests.get('https://www.bbc.com/news')
     h = BeautifulSoup(res.text, 'html.parser')
