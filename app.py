@@ -1,7 +1,7 @@
 from flask import Flask, render_template, url_for, request, jsonify
 import sqlite3
 from apscheduler.schedulers.background import BackgroundScheduler
-from scrape_content import scrape_bbc_news, scrape_techcrunch_items, NewsItem
+from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem
 from collections import defaultdict
 
 
@@ -43,9 +43,10 @@ def scrape():
     scheduler = BackgroundScheduler()
     scheduler.add_job(scrape_bbc_news, 'interval', minutes=5, id='cnn_scraper')
     scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=5, id='techcrunch_scraper')
+    scheduler.add_job(scrape_ynet, 'interval', minutes=5, id='ynet_scraper')
     scheduler.start()
 
 
 if __name__ == '__main__':
     scrape()
-    app.run(port=8080, threaded=True, debug=True)
+    app.run(port=8080, threaded=True)#, debug=True)

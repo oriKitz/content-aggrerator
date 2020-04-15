@@ -13,6 +13,85 @@ def ts_to_datetime(ts):
     return datetime.datetime(1970, 1, 1) + datetime.timedelta(seconds=ts)
 
 
+def get_ynet_article_date(link):
+    article_page = requests.get(link)
+    article_html = BeautifulSoup(article_page.text, 'html.parser')
+    try:
+        publish_time = article_html.find_all(attrs={'class': 'art_header_footer_author'})[1].string
+        publish_time = publish_time[publish_time.find(':') + 1:]
+    except:
+        try:
+            publish_time = article_html.find(attrs={'class': 'author-small'}).string.splitlines()[2].strip().replace(
+                '|', '')
+        except:
+            try:
+                publish_time = article_html.find(attrs={'class': 'date'}).contents[1]
+            except:
+                print(f'error extracting date from {link}')
+                publish_time = datetime.datetime.now()
+                return publish_time
+    publish_time = parse(publish_time)
+    return publish_time
+
+
+def scrape_ynet_main_article(html):
+    main_article = html.find_all(attrs={'class': 'block B6'})[2]
+    main_article = main_article.div.div.div.find_all('div')[1]
+    link = 'https://www.ynet.co.il' + main_article.a['href']
+    headline = main_article.a.span.string
+    summary = main_article.find_all('a')[1].string
+    publish_time = get_ynet_article_date(link)
+
+    news_item = NewsItem('ynet', headline, summary, link, publish_time)
+    return news_item
+
+
+def scrape_ynet_primary_articles(html):
+    articles = html.find_all(attrs={'class': 'block B6'})[4]
+    primary_articles = articles.div.div.find_all(attrs={'class': 'B3'})[:-1]
+    news_items = []
+
+    for article in primary_articles:
+        headline = article.div.find(attrs={'class': 'cwide'}).a.div.div.string
+        summary = article.div.find(attrs={'class': 'cwide'}).a.div.find_all('div')[1].string
+        link = 'https://www.ynet.co.il' + article.div.find(attrs={'class': 'cwide'}).a['href']
+        publish_time = get_ynet_article_date(link)
+
+        news_item = NewsItem('ynet', headline, summary, link, publish_time)
+        news_items.append(news_item)
+
+    return news_items
+
+
+def scrape_ynet_secondary_articles(html):
+    articles = html.find_all(attrs={'class': 'block B6'})[4]
+    secondary = articles.div.div.find_all(attrs={'class': 'hpstrip3spanFloatR'})[1:]
+    news_items = []
+
+    for article in secondary:
+        link = 'https://www.ynet.co.il' + article.a['href']
+        # headline = article.div.a.div.string
+        headline = article.div.a.find_all('div')[1].string
+        summary = ''
+        publish_time = get_ynet_article_date(link)
+
+        news_item = NewsItem('ynet', headline, summary, link, publish_time)
+        news_items.append(news_item)
+
+    return news_items
+
+
+def scrape_ynet():
+    res = requests.get('https://www.ynet.co.il/home/0,7340,L-8,00.html')
+    html = BeautifulSoup(res.text, 'html.parser')
+    news_items = [scrape_ynet_main_article(html)]
+    news_items.extend(scrape_ynet_primary_articles(html))
+    news_items.extend(scrape_ynet_secondary_articles(html))
+
+    for news_item in news_items:
+        news_item.update_db()
+
+
 def scrape_techcrunch_items():
     res = requests.get('https://techcrunch.com')
     h = BeautifulSoup(res.text, 'html.parser')
@@ -65,7 +144,7 @@ class NewsItem:
         self.publish_time = publish_time
 
     def __repr__(self):
-        return f'{self.headline}: {self.summary}\r\n{self.link}\r\n{self.publish_time}'
+        return f'{self.headline}: {self.summary}\r\n{self.link}\r\n{self.publish_time}\r\n'
 
     @property
     def article_in_db(self):
@@ -92,4 +171,4 @@ class NewsItem:
 
 
 if __name__ == '__main__':
-    pass
+    scrape_ynet()
