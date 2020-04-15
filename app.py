@@ -32,8 +32,7 @@ def reserve_first_items_of_list(l, n_items):
 def get_raw_data():
     con = sqlite3.connect(DB)
     cur = con.cursor()
-    cur.execute(
-        f"""select * from {TABLE_NAME} where publish_time > date('now', '-1 days') order by publish_time desc""")
+    cur.execute(f"""select * from {TABLE_NAME} where publish_time > date('now', '-1 days') order by publish_time desc""")
     data = cur.fetchall()
     con.commit()
     con.close()

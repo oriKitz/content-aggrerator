@@ -71,8 +71,7 @@ class NewsItem:
     def article_in_db(self):
         con = sqlite3.connect(DB)
         cur = con.cursor()
-        cur.execute(
-            f"""select 1 from {TABLE_NAME} where link = '{self.link}'""")
+        cur.execute(f"""select 1 from {TABLE_NAME} where link = '{self.link}'""")
         results = cur.fetchall()
         con.commit()
         con.close()
