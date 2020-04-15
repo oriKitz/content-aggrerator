@@ -19,17 +19,23 @@
     </div>
     <br>
     <div class="container" id="content">
-        <div class="row justify-content-around">
-            {% for site, news_items in data.items() %}
-            <div class="col col-md-5">
+        <div class="row row2 justify-content-around">
+            {% for site in sites %}
+            <div class="col col-md-5 mb-4">
                 <h5 class="display-5" align="center" >{{ site }}</h5>
-                {% for item in news_items %}
+                {% for item in data[site] %}
                 <div class="row">
                     <div class="col col-md-10" style="border-bottom: 1px solid #eeeded;">
+                        {% if item.summary != '' %}
                         <a style="text-decoration: none; color: black;"
                            href="{{item.link}}" target="_blank" data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{item.summary}}</em>">
                             {{item.headline}}
                         </a>
+                        {% else %}
+                        <a style="text-decoration: none; color: black;" href="{{item.link}}" target="_blank">
+                            {{item.headline}}
+                        </a>
+                        {% endif %}
                     </div>
                     <div class="col col-md-2" style="text-align: right;">
                         <em style="font-size: 12px;">{{item.publish_time[11:16]}}</em>

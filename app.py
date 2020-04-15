@@ -7,6 +7,7 @@ from collections import defaultdict
 
 DB = 'news.db'
 TABLE_NAME = 'top_stories'
+WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
 
 
 app = Flask(__name__)
@@ -14,7 +15,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-    return render_template('main_page.html', data=get_data())
+    return render_template('main_page.html', data=get_data(), sites=WEBSITES_ORDER)
 
 
 def get_data():
@@ -49,4 +50,4 @@ def scrape():
 
 if __name__ == '__main__':
     scrape()
-    app.run(port=8080, threaded=True)#, debug=True)
+    app.run(port=8080, threaded=True, debug=True)
