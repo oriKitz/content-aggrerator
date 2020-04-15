@@ -1,12 +1,10 @@
 from flask import Flask, render_template, url_for, request, jsonify
 import sqlite3
 from apscheduler.schedulers.background import BackgroundScheduler
-from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem
+from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem, DB, TABLE_NAME
 from collections import defaultdict
 
 
-DB = 'news.db'
-TABLE_NAME = 'top_stories'
 WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
 
 

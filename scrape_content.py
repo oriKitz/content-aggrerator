@@ -5,7 +5,7 @@ import sqlite3
 from dateutil.parser import parse
 
 
-DB = 'news.db'
+DB = 'db/news.db'
 TABLE_NAME = 'top_stories'
 
 
@@ -180,4 +180,4 @@ class NewsItem:
 
 
 if __name__ == '__main__':
-    scrape_ynet()
+    pass
