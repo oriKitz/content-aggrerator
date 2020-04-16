@@ -21,7 +21,6 @@ def ts_to_datetime(ts):
 
 
 def get_ynet_article_date(link):
-    print(link)
     article_page = requests.get(link)
     article_html = BeautifulSoup(article_page.text, 'html.parser')
     try:
