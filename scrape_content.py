@@ -43,7 +43,9 @@ def get_ynet_article_date(link):
 def scrape_ynet_main_article(html):
     main_article = html.find_all(attrs={'class': 'block B6'})[2]
     main_article = main_article.div.div.div.find_all('div')[1]
-    link = 'https://www.ynet.co.il' + main_article.a['href'].replace('#autoplay', '')
+    link = main_article.a['href'].replace('#autoplay', '')
+    if 'ynet.co' not in link:
+        link = 'https://www.ynet.co.il' + link
     headline = main_article.a.span.string
     summary = main_article.find_all('a')[1].string
     publish_time = get_ynet_article_date(link)
@@ -60,7 +62,9 @@ def scrape_ynet_primary_articles(html):
     for article in primary_articles:
         headline = article.div.find(attrs={'class': 'cwide'}).a.div.div.string
         summary = article.div.find(attrs={'class': 'cwide'}).a.div.find_all('div')[1].string
-        link = 'https://www.ynet.co.il' + article.div.find(attrs={'class': 'cwide'}).a['href'].replace('#autoplay', '')
+        link = article.div.find(attrs={'class': 'cwide'}).a['href'].replace('#autoplay', '')
+        if 'ynet.co' not in link:
+            link = 'https://www.ynet.co.il' + link
         publish_time = get_ynet_article_date(link)
 
         news_item = NewsItem('ynet', headline, summary, link, publish_time)
@@ -107,9 +111,15 @@ def scrape_techcrunch_items():
 
     for post in posts:
         headline = post.header.h2.a.string.strip()
-        summary = post.find('div', recursive=False).string.strip()
+        try:
+            summary = post.find('div', recursive=False).string.strip()
+        except:
+            summary = ''
         link = post.header.h2.a['href']
-        dt = parse(post.header.div.div.time['datetime']) + datetime.timedelta(hours=10)
+        try:
+            dt = parse(post.header.div.div.time['datetime']) + datetime.timedelta(hours=10)
+        except:
+            dt = datetime.datetime.now()
 
         news_item = NewsItem('TechCrunch', headline, summary, link, dt)
         news_item.update_db()
