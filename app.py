@@ -4,6 +4,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem, DB, TABLE_NAME
 from collections import defaultdict
+import datetime
 
 
 WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
@@ -41,9 +42,9 @@ def get_raw_data():
 
 def events_listener(event):
     if event.exception:
-        print(f'Job {event.job_id} failed with error {event.exception}')
+        print(f'Job {event.job_id} failed with error {event.exception} at {datetime.datetime.now()}')
     else:
-        print(f'Job {event.job_id} finished running successfully')
+        print(f'Job {event.job_id} finished running successfully at {datetime.datetime.now()}')
 
 
 def scrape():
