@@ -21,6 +21,7 @@ def ts_to_datetime(ts):
 
 
 def get_ynet_article_date(link):
+    print(link)
     article_page = requests.get(link)
     article_html = BeautifulSoup(article_page.text, 'html.parser')
     try:
@@ -75,7 +76,9 @@ def scrape_ynet_secondary_articles(html):
     news_items = []
 
     for article in secondary:
-        link = 'https://www.ynet.co.il' + article.a['href']
+        link = article.a['href']
+        if 'ynet.co' not in link:
+            link = 'https://www.ynet.co.il' + link
         # headline = article.div.a.div.string
         headline = article.div.a.find_all('div')[1].string
         summary = ''
@@ -180,4 +183,4 @@ class NewsItem:
 
 
 if __name__ == '__main__':
-    pass
+    scrape_ynet()
