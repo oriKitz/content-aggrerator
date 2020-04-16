@@ -28,11 +28,6 @@ def search():
     return jsonify(get_data(search_text, False))
 
 
-@app.route('/dyn')
-def dynamic_search_page():
-    return render_template('dynamic_search.html')
-
-
 def get_data(text_limit='', get_news_item_object=True):
     raw_data = get_raw_data(text_limit)
     news_items = defaultdict(list)
