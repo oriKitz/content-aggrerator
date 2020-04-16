@@ -43,7 +43,7 @@ def get_ynet_article_date(link):
 def scrape_ynet_main_article(html):
     main_article = html.find_all(attrs={'class': 'block B6'})[2]
     main_article = main_article.div.div.div.find_all('div')[1]
-    link = 'https://www.ynet.co.il' + main_article.a['href']
+    link = 'https://www.ynet.co.il' + main_article.a['href'].replace('#autoplay', '')
     headline = main_article.a.span.string
     summary = main_article.find_all('a')[1].string
     publish_time = get_ynet_article_date(link)
@@ -60,7 +60,7 @@ def scrape_ynet_primary_articles(html):
     for article in primary_articles:
         headline = article.div.find(attrs={'class': 'cwide'}).a.div.div.string
         summary = article.div.find(attrs={'class': 'cwide'}).a.div.find_all('div')[1].string
-        link = 'https://www.ynet.co.il' + article.div.find(attrs={'class': 'cwide'}).a['href']
+        link = 'https://www.ynet.co.il' + article.div.find(attrs={'class': 'cwide'}).a['href'].replace('#autoplay', '')
         publish_time = get_ynet_article_date(link)
 
         news_item = NewsItem('ynet', headline, summary, link, publish_time)
@@ -75,7 +75,7 @@ def scrape_ynet_secondary_articles(html):
     news_items = []
 
     for article in secondary:
-        link = article.a['href']
+        link = article.a['href'].replace('#autoplay', '')
         if 'ynet.co' not in link:
             link = 'https://www.ynet.co.il' + link
         # headline = article.div.a.div.string
