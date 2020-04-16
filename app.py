@@ -1,6 +1,7 @@
 from flask import Flask, render_template, url_for, request, jsonify
 import sqlite3
 from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem, DB, TABLE_NAME
 from collections import defaultdict
 
@@ -38,11 +39,19 @@ def get_raw_data():
     return data
 
 
+def events_listener(event):
+    if event.exception:
+        print(f'Job {event.job_id} failed with error {event.exception}')
+    else:
+        print(f'Job {event.job_id} finished running successfully')
+
+
 def scrape():
     scheduler = BackgroundScheduler()
     scheduler.add_job(scrape_bbc_news, 'interval', minutes=5, id='cnn_scraper')
     scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=5, id='techcrunch_scraper')
     scheduler.add_job(scrape_ynet, 'interval', minutes=5, id='ynet_scraper')
+    scheduler.add_listener(events_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
     scheduler.start()
 
 
