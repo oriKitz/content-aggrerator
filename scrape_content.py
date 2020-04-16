@@ -161,7 +161,7 @@ class NewsItem:
     def article_in_db(self):
         con = sqlite3.connect(DB)
         cur = con.cursor()
-        cur.execute(f"""select 1 from {TABLE_NAME} where (link = '{self.link}') or (headline = '{self.headline}' and summary = '{self.summary}')""")
+        cur.execute(f"""select 1 from {TABLE_NAME} where (link = '{self.link}') or (headline = '{self.solve_escaping(self.headline)}' and summary = '{self.solve_escaping(self.headline)}')""")
         results = cur.fetchall()
         con.commit()
         con.close()
@@ -182,4 +182,4 @@ class NewsItem:
 
 
 if __name__ == '__main__':
-    scrape_ynet()
+    pass
