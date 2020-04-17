@@ -5,8 +5,8 @@ $(document).ready(function() {
 function search() {
     var req = new XMLHttpRequest();
     var searchBox = document.getElementById('searchbox');
-    req.open('GET', '/search?search=' + searchBox.value);
-    console.log('/search?search=' + searchBox.value);
+    var checkbox = document.getElementById('regex');
+    req.open('GET', '/search?search=' + searchBox.value + '&regex=' + checkbox.checked);
     req.onload = function() {
         var json = JSON.parse(req.responseText)
         var articlesRow = document.getElementById('articles');

@@ -5,6 +5,7 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from collections import defaultdict
 import datetime
 from threading import Thread
+import re
 from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet
 from news import NewsItem, DB, TABLE_NAME
 
@@ -23,11 +24,13 @@ def main():
 @app.route('/search')
 def search():
     search_text = request.args.get('search')
-    return jsonify(get_data(search_text))
+    regex = request.args.get('regex')
+    regex = True if regex == 'true' else False
+    return jsonify(get_data(search_text, regex))
 
 
-def get_data(text_limit=''):
-    raw_data = get_raw_data(text_limit)
+def get_data(text_limit, use_regex):
+    raw_data = get_raw_data(text_limit, use_regex)
     news_items = defaultdict(list)
     for line in raw_data:
         news_items[line[0]].append(NewsItem(*line).__dict__)
@@ -38,12 +41,22 @@ def reserve_first_items_of_list(l, n_items):
     return sorted(l, key=lambda x: x['publish_time'], reverse=True)[:n_items]
 
 
-def get_raw_data(text_limit):
+def regexp(expr, item):
+    reg = re.compile(expr)
+    return reg.search(item) is not None
+
+
+def get_raw_data(text_limit, use_regex):
     con = sqlite3.connect(DB)
+    con.create_function("REGEXP", 2, regexp)
     cur = con.cursor()
+    if use_regex:
+        condition = f"headline regexp '{text_limit}' or summary regexp '{text_limit}'"
+    else:
+        condition = f"headline like '%{text_limit}%' or summary like '%{text_limit}%'"
     cur.execute(f"""select * from {TABLE_NAME} 
                     where publish_time > date('now', '-1 days') 
-                        and (headline like '%{text_limit}%' or summary like '%{text_limit}%')
+                      and ({condition})
                     order by publish_time desc""")
     data = cur.fetchall()
     con.commit()
@@ -65,7 +78,7 @@ def run_all_jobs(scheduler):
 
 def scrape():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='cnn_scraper')
+    scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper')
     scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper')
     scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper')
     scheduler.add_listener(events_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
