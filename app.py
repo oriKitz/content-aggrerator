@@ -5,7 +5,8 @@ from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from collections import defaultdict
 import datetime
 from threading import Thread
-from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem, DB, TABLE_NAME
+from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet
+from news import NewsItem, DB, TABLE_NAME
 
 
 WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
@@ -16,7 +17,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-    return render_template('home.html')#, data=get_data(), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
+    return render_template('home.html')
 
 
 @app.route('/search')
