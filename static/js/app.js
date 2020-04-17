@@ -17,7 +17,6 @@ function search() {
         console.log("Connection error");
     };
     req.send();
-
 };
 
 function renderHTML(data) {

@@ -16,32 +16,10 @@
     </div>
     <br>
     <div class="container" id="content">
-        <div class="row row2 justify-content-around" id="articles">
-            {% for site in sites %}
-            <div class="col col-md-5 mb-4">
-                <h5 class="display-5" align="center" >{{ site }}</h5>
-                {% for item in data[site] %}
-                <div class="row">
-                    <div class="col col-md-9" style="border-bottom: 1px solid #eeeded;">
-                        {% if item.summary != '' %}
-                        <a style="text-decoration: none; color: black;"
-                           href="{{item.link}}" target="_blank" data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>{{item.summary}}</em>">
-                            {{item.headline}}
-                        </a>
-                        {% else %}
-                        <a style="text-decoration: none; color: black;" href="{{item.link}}" target="_blank">
-                            {{item.headline}}
-                        </a>
-                        {% endif %}
-                    </div>
-                    <div class="col col-md-3" style="text-align: right;">
-                        <em style="font-size: 12px;">{{get_date_for_show(item.publish_time)}}</em>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% endfor %}
-        </div>
+        <div class="row row2 justify-content-around" id="articles"></div>
     </div>
 </body>
+<script>
+    search()
+</script>
 </html>
