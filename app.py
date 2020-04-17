@@ -2,10 +2,11 @@ from flask import Flask, render_template, url_for, request, jsonify
 import sqlite3
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
-from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem, DB, TABLE_NAME
 from collections import defaultdict
 import datetime
 from dateutil.parser import parse
+from threading import Thread
+from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet, NewsItem, DB, TABLE_NAME
 
 
 WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
@@ -44,8 +45,10 @@ def get_data(text_limit='', get_news_item_object=True):
 def reserve_first_items_of_news_items_list(l, n_items):
     return sorted(l, key=lambda x: x.publish_time, reverse=True)[:n_items]
 
+
 def reserve_first_items_of_list(l, n_items):
     return sorted(l, key=lambda x: x['publish_time'], reverse=True)[:n_items]
+
 
 def get_raw_data(text_limit):
     con = sqlite3.connect(DB)
@@ -72,12 +75,19 @@ def events_listener(event):
         print(f'Job {event.job_id} finished running successfully at {datetime.datetime.now()}')
 
 
+def run_all_jobs(scheduler):
+    for job in scheduler.get_jobs():
+        job.func()
+
+
 def scrape():
     scheduler = BackgroundScheduler()
     scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='cnn_scraper')
     scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper')
     scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper')
     scheduler.add_listener(events_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+    first_run = Thread(target=run_all_jobs, args=(scheduler,))
+    first_run.start()
     scheduler.start()
 
 
