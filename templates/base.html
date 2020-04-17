@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>News</title>
     <link rel="stylesheet" href="/static/css/bootstrap.css"/>
+    <link rel="stylesheet" href="/static/css/style.css"/>
     <script type="text/javascript" src="http://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script type='text/javascript' src="/static/js/bootstrap.js"></script>
     <script type='text/javascript' src="/static/js/bootstrap.bundle.js"></script>
@@ -16,9 +17,10 @@
     </div>
     <br>
     <div class="container" id="content">
-        <div class="row row2 justify-content-around" id="articles">
-            {% include "articles.html" %}
-        </div>
+        <div class="row row2 justify-content-around" id="articles"></div>
     </div>
 </body>
+<script>
+    search()
+</script>
 </html>
