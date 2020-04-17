@@ -17,14 +17,14 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-    return render_template('main_page.html', data=get_data(), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
+    return render_template('base.html', data=get_data(), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
 
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     if request.method == 'POST':
         search_text = request.form['search']
-        return render_template('main_page.html', data=get_data(search_text), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
+        return render_template('base.html', data=get_data(search_text), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
     search_text = request.args.get('search')
     return jsonify(get_data(search_text, False))
 
