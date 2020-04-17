@@ -18,7 +18,7 @@
     <div class="container" id="content">
         <div class="row row2 justify-content-around" id="articles">
             {% for site in sites %}
-            <div class="col col-md-5 mb-4">
+            <div class="col col-md-5 mb-4" id="{{site}}">
                 <h5 class="display-5" align="center" >{{ site }}</h5>
                 {% for item in data[site] %}
                 <div class="row">

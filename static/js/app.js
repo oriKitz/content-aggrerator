@@ -17,8 +17,12 @@ function search() {
         console.log("Connection error");
     };
     req.send();
-
 };
+
+function getPrettyDate(dateString) {
+    var date = new Date(dateString.slice(0, 19))
+    return date.getDate().toString().padStart(2, '0') + "." + date.getMonth().toString().padStart(2, '0') + " " + date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
+}
 
 function renderHTML(data) {
     var articlesRow = document.getElementById('articles');
@@ -36,7 +40,7 @@ function renderHTML(data) {
             else {
                 htmlString += '<a style="text-decoration: none; color: black;" href="' + article.link + '" target="_blank">' + article.headline + '</a>'
             }
-            htmlString += '</div><div class="col col-md-3" style="text-align: right;"><em style="font-size: 12px;">' + article.publish_time + '</em></div></div>'
+            htmlString += '</div><div class="col col-md-3" style="text-align: right;"><em style="font-size: 12px;">' + getPrettyDate(article.publish_time) + '</em></div></div>'
         }
         htmlString += '</div>'
     }
