@@ -125,21 +125,25 @@ def scrape_techcrunch_items():
 def scrape_bbc_news():
     res = requests.get('https://www.bbc.com/news')
     h = BeautifulSoup(res.text, 'html.parser')
-    top_stories = h.find_all('div', ['nw-c-top-stories__secondary-item', 'nw-c-top-stories__primary-item'])
+    articles = h.html.find_all(attrs={'class': 'gs-c-promo-body'})
 
-    for story in top_stories:
-        if 'nw-c-top-stories__secondary-item--1' not in story['class']:
-            headline = story.div.find('div', 'gs-c-promo-body').div.a.h3.string
-            summary = story.div.find('div', 'gs-c-promo-body').div.p.string
-            link = 'https://www.bbc.com' + story.div.find('div', 'gs-c-promo-body').div.a['href']
+    for i, article in enumerate(articles):
+        if i > 5:
+            break
+        try:
+            headline = article.div.a.h3.string
+            summary = article.div.p.string
+            link = 'https://www.bbc.com' + article.div.a['href']
             try:
-                ts = story.div.find('div', 'gs-c-promo-body').ul.li.span.time['data-seconds']
+                ts = article.ul.li.span.time['data-seconds']
                 dt = ts_to_datetime(int(ts)) + datetime.timedelta(hours=3)
             except:
                 dt = datetime.datetime.now()
 
             news_item = NewsItem('BBC', headline, summary, link, dt)
             news_item.update_db()
+        except Exception as e:
+            print(e)
 
 
 def create_empty_table():
@@ -151,4 +155,4 @@ def create_empty_table():
 
 
 if __name__ == '__main__':
-    pass
+    scrape_bbc_news()
