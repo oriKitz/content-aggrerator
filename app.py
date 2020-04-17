@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def main():
-    return render_template('base.html')#, data=get_data(), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
+    return render_template('home.html')#, data=get_data(), sites=WEBSITES_ORDER, get_date_for_show=get_date_for_show)
 
 
 @app.route('/search')
