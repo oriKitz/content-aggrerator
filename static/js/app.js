@@ -24,6 +24,15 @@ function getPrettyDate(dateString) {
     return date.getDate().toString().padStart(2, '0') + "." + date.getMonth().toString().padStart(2, '0') + " " + date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
 }
 
+function escapeHtml(unsafe) {
+    return unsafe
+         .replace(/&/g, "&amp;")
+         .replace(/</g, "&lt;")
+         .replace(/>/g, "&gt;")
+         .replace(/"/g, "&quot;")
+         .replace(/'/g, "&#039;");
+ }
+
 function renderHTML(data) {
     var articlesRow = document.getElementById('articles');
     var htmlString = ''
@@ -35,10 +44,10 @@ function renderHTML(data) {
             htmlString += '<div class="row"><div class="col col-md-9" style="border-bottom: 1px solid #eeeded;">'
             if (article.summary != '') {
                 htmlString += '<a style="text-decoration: none; color: black;" href="' + article.link + '" target="_blank" data-toggle="tooltip" data-placement="bottom" data-html="true" title="<em>'
-                htmlString += article.summary + '</em>">' + article.headline + '</a>'
+                htmlString += escapeHtml(article.summary) + '</em>">' + escapeHtml(article.headline) + '</a>'
             }
             else {
-                htmlString += '<a style="text-decoration: none; color: black;" href="' + article.link + '" target="_blank">' + article.headline + '</a>'
+                htmlString += '<a style="text-decoration: none; color: black;" href="' + article.link + '" target="_blank">' + escapeHtml(article.headline) + '</a>'
             }
             htmlString += '</div><div class="col col-md-3" style="text-align: right;"><em style="font-size: 12px;">' + getPrettyDate(article.publish_time) + '</em></div></div>'
         }
