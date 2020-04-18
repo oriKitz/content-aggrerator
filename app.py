@@ -78,12 +78,11 @@ def run_all_jobs(scheduler):
 
 def scrape():
     scheduler = BackgroundScheduler()
-    scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper')
-    scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper')
-    scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper')
+    soon = datetime.datetime.now() + datetime.timedelta(seconds=15)
+    scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper', next_run_time=soon)
+    scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper', next_run_time=soon)
+    scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper', next_run_time=soon)
     scheduler.add_listener(events_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
-    first_run = Thread(target=run_all_jobs, args=(scheduler,))
-    first_run.start()
     scheduler.start()
 
 
