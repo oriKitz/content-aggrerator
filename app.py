@@ -71,11 +71,6 @@ def events_listener(event):
         print(f'Job {event.job_id} finished running successfully at {datetime.datetime.now()}')
 
 
-def run_all_jobs(scheduler):
-    for job in scheduler.get_jobs():
-        job.func()
-
-
 def scrape():
     scheduler = BackgroundScheduler()
     soon = datetime.datetime.now() + datetime.timedelta(seconds=15)
