@@ -4,7 +4,6 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from collections import defaultdict
 import datetime
-from threading import Thread
 import re
 from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet
 from news import NewsItem, DB, TABLE_NAME
