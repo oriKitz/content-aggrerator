@@ -54,7 +54,7 @@ def get_raw_data(text_limit, use_regex):
     else:
         condition = f"headline like '%{text_limit}%' or summary like '%{text_limit}%'"
     cur.execute(f"""select * from {TABLE_NAME} 
-                    where publish_time > date('now', '-1 days') 
+                    where publish_time > date('now', '-7 days') 
                       and ({condition})
                     order by publish_time desc""")
     data = cur.fetchall()
