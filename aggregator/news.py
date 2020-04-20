@@ -1,7 +1,7 @@
 import sqlite3
 
 
-DB = 'db/news.db'
+DB = 'aggregator/db/news.db'
 TABLE_NAME = 'top_stories'
 
 

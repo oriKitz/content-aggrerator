@@ -1,18 +1,12 @@
 from flask import Flask, render_template, url_for, request, jsonify
 import sqlite3
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
 from collections import defaultdict
-import datetime
 import re
-from scrape_content import scrape_bbc_news, scrape_techcrunch_items, scrape_ynet
-from news import NewsItem, DB, TABLE_NAME
+from aggregator import app
+from .news import NewsItem, DB, TABLE_NAME
 
 
 WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
-
-
-app = Flask(__name__)
 
 
 @app.route('/')
@@ -46,6 +40,7 @@ def regexp(expr, item):
 
 
 def get_raw_data(text_limit, use_regex):
+    print(DB)
     con = sqlite3.connect(DB)
     con.create_function("REGEXP", 2, regexp)
     cur = con.cursor()
@@ -62,24 +57,3 @@ def get_raw_data(text_limit, use_regex):
     con.close()
     return data
 
-
-def events_listener(event):
-    if event.exception:
-        print(f'Job {event.job_id} failed with error {event.exception} at {datetime.datetime.now()}')
-    else:
-        print(f'Job {event.job_id} finished running successfully at {datetime.datetime.now()}')
-
-
-def scrape():
-    scheduler = BackgroundScheduler()
-    soon = datetime.datetime.now() + datetime.timedelta(seconds=15)
-    scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper', next_run_time=soon)
-    scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper', next_run_time=soon)
-    scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper', next_run_time=soon)
-    scheduler.add_listener(events_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
-    scheduler.start()
-
-
-if __name__ == '__main__':
-    scrape()
-    app.run(host='127.0.0.1', port=8080, threaded=True, debug=True)

@@ -3,7 +3,9 @@ import requests
 import datetime
 import sqlite3
 from dateutil.parser import parse
-from news import NewsItem, DB
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
+from .news import NewsItem, DB
 
 
 def running_message_decorator(func):
@@ -154,5 +156,18 @@ def create_empty_table():
     con.close()
 
 
-if __name__ == '__main__':
-    scrape_bbc_news()
+def events_listener(event):
+    if event.exception:
+        print(f'Job {event.job_id} failed with error {event.exception} at {datetime.datetime.now()}')
+    else:
+        print(f'Job {event.job_id} finished running successfully at {datetime.datetime.now()}')
+
+
+def scrape():
+    scheduler = BackgroundScheduler()
+    soon = datetime.datetime.now() + datetime.timedelta(seconds=15)
+    scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper', next_run_time=soon)
+    scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper', next_run_time=soon)
+    scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper', next_run_time=soon)
+    scheduler.add_listener(events_listener, EVENT_JOB_EXECUTED | EVENT_JOB_ERROR)
+    scheduler.start()
