@@ -1,18 +1,11 @@
 from bs4 import BeautifulSoup
 import requests
 import datetime
-import sqlite3
 from dateutil.parser import parse
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.events import EVENT_JOB_EXECUTED, EVENT_JOB_ERROR
-from .news import NewsItem, DB
-
-
-def running_message_decorator(func):
-    def messager():
-        func()
-        print(f'finished running {func.__name__} at {datetime.datetime.now()}')
-    return messager
+from aggregator import db
+from .models import NewsItem
 
 
 def ts_to_datetime(ts):
@@ -49,7 +42,7 @@ def scrape_ynet_main_article(html):
     summary = main_article.find_all('a')[1].string
     publish_time = get_ynet_article_date(link)
 
-    news_item = NewsItem('ynet', headline, summary, link, publish_time)
+    news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
     return news_item
 
 
@@ -66,7 +59,7 @@ def scrape_ynet_primary_articles(html):
             link = 'https://www.ynet.co.il' + link
         publish_time = get_ynet_article_date(link)
 
-        news_item = NewsItem('ynet', headline, summary, link, publish_time)
+        news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
         news_items.append(news_item)
 
     return news_items
@@ -86,7 +79,7 @@ def scrape_ynet_secondary_articles(html):
         summary = ''
         publish_time = get_ynet_article_date(link)
 
-        news_item = NewsItem('ynet', headline, summary, link, publish_time)
+        news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
         news_items.append(news_item)
 
     return news_items
@@ -100,7 +93,9 @@ def scrape_ynet():
     news_items.extend(scrape_ynet_secondary_articles(html))
 
     for news_item in news_items:
-        news_item.update_db()
+        if not NewsItem.query.filter_by(link=news_item.link).first():
+            db.session.add(news_item)
+            db.session.commit()
 
 
 def scrape_techcrunch_items():
@@ -120,8 +115,10 @@ def scrape_techcrunch_items():
         except:
             dt = datetime.datetime.now()
 
-        news_item = NewsItem('TechCrunch', headline, summary, link, dt)
-        news_item.update_db()
+        if not NewsItem.query.filter_by(link=link).first():
+            news_item = NewsItem(website='TechCrunch', headline=headline, summary=summary, link=link, publish_time=dt)
+            db.session.add(news_item)
+            db.session.commit()
 
 
 def scrape_bbc_news():
@@ -142,18 +139,12 @@ def scrape_bbc_news():
             except:
                 dt = datetime.datetime.now()
 
-            news_item = NewsItem('BBC', headline, summary, link, dt)
-            news_item.update_db()
+            if not NewsItem.query.filter_by(link=link).first():
+                news_item = NewsItem(website='BBC', headline=headline, summary=summary, link=link, publish_time=dt)
+                db.session.add(news_item)
+                db.session.commit()
         except Exception as e:
             print(e)
-
-
-def create_empty_table():
-    con = sqlite3.connect(DB)
-    cur = con.cursor()
-    cur.execute(f"""create table {TABLE_NAME} (website text, headline text, summary text, link text, publish_time timestamp)""")
-    con.commit()
-    con.close()
 
 
 def events_listener(event):
@@ -165,7 +156,7 @@ def events_listener(event):
 
 def scrape():
     scheduler = BackgroundScheduler()
-    soon = datetime.datetime.now() + datetime.timedelta(seconds=15)
+    soon = datetime.datetime.now() + datetime.timedelta(seconds=5)
     scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper', next_run_time=soon)
     scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper', next_run_time=soon)
     scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper', next_run_time=soon)
