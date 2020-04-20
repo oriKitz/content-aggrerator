@@ -20,7 +20,7 @@ function search() {
 };
 
 function getPrettyDate(dateString) {
-    var date = new Date(dateString.slice(0, 19))
+    var date = new Date(dateString.slice(0, -3))
     return date.getDate().toString().padStart(2, '0') + "." + date.getMonth().toString().padStart(2, '0') + " " + date.getHours().toString().padStart(2, '0') + ':' + date.getMinutes().toString().padStart(2, '0')
 }
 

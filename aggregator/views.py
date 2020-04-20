@@ -1,12 +1,10 @@
 from flask import Flask, render_template, url_for, request, jsonify
-import sqlite3
+import datetime
 from collections import defaultdict
 import re
 from aggregator import app
-from .news import NewsItem, DB, TABLE_NAME
-
-
-WEBSITES_ORDER = ['BBC', 'ynet', 'TechCrunch']
+from .models import NewsItem
+from sqlalchemy import or_
 
 
 @app.route('/')
@@ -17,43 +15,23 @@ def main():
 @app.route('/search')
 def search():
     search_text = request.args.get('search')
-    regex = request.args.get('regex')
+    regex = request.args.get('regex', None)
     regex = True if regex == 'true' else False
     return jsonify(get_data(search_text, regex))
 
 
 def get_data(text_limit, use_regex):
-    raw_data = get_raw_data(text_limit, use_regex)
-    news_items = defaultdict(list)
-    for line in raw_data:
-        news_items[line[0]].append(NewsItem(*line).__dict__)
-    return {k: reserve_first_items_of_list(v, 8) for k, v in news_items.items()}
-
-
-def reserve_first_items_of_list(l, n_items):
-    return sorted(l, key=lambda x: x['publish_time'], reverse=True)[:n_items]
-
-
-def regexp(expr, item):
-    reg = re.compile(expr)
-    return reg.search(item) is not None
-
-
-def get_raw_data(text_limit, use_regex):
-    print(DB)
-    con = sqlite3.connect(DB)
-    con.create_function("REGEXP", 2, regexp)
-    cur = con.cursor()
     if use_regex:
-        condition = f"headline regexp '{text_limit}' or summary regexp '{text_limit}'"
+        matching_articles = NewsItem.query\
+            .filter(NewsItem.publish_time > datetime.datetime.now() - datetime.timedelta(days=7))\
+            .order_by(NewsItem.publish_time).all()[::-1]
+        matching_articles = [article for article in matching_articles if re.compile(text_limit).search(article.summary) or re.compile(text_limit).search(article.headline)]
     else:
-        condition = f"headline like '%{text_limit}%' or summary like '%{text_limit}%'"
-    cur.execute(f"""select * from {TABLE_NAME} 
-                    where publish_time > date('now', '-7 days') 
-                      and ({condition})
-                    order by publish_time desc""")
-    data = cur.fetchall()
-    con.commit()
-    con.close()
-    return data
-
+        matching_articles = NewsItem.query\
+            .filter(or_(NewsItem.summary.contains(text_limit), NewsItem.headline.contains(text_limit)))\
+            .filter(NewsItem.publish_time > datetime.datetime.now() - datetime.timedelta(days=7))\
+            .order_by(NewsItem.publish_time).all()[::-1]
+    news_items = defaultdict(list)
+    for article in matching_articles:
+        news_items[article.website].append(article.serialize())
+    return {k: v[:8] for k, v in news_items.items()}
