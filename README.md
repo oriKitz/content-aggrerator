@@ -5,10 +5,11 @@ run in CMD: python app.py
 and then go to http://localhost:8080/
 
 External libs required:
-- sqlite3
+- flask, And its extensions: flask_sqlalchemy, flask_bcrypt, flask_login, flask_migrate, flask_wtf
+- wtforms
 - bs4 (beautifulsoup)
 - dateutil
-- flask
 - apscheduler
+- sqlalchemy
 
-Runs on python 3
+Runs on python 3.6 and above
