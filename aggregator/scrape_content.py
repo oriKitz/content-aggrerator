@@ -35,21 +35,24 @@ def scrape_techcrunch_items():
     posts = h.find_all(attrs={'class': 'post-block'}, recursive=True)
 
     for post in posts:
-        headline = post.header.h2.a.string.strip()
         try:
-            summary = post.find('div', recursive=False).string.strip()
-        except:
-            summary = ''
-        link = post.header.h2.a['href']
-        try:
-            dt = parse(post.header.div.div.time['datetime']) + datetime.timedelta(hours=10)
-        except:
-            dt = datetime.datetime.now()
+            headline = post.header.h2.a.string.strip()
+            try:
+                summary = post.find('div', recursive=False).string.strip()
+            except:
+                summary = ''
+            link = post.header.h2.a['href']
+            try:
+                dt = parse(post.header.div.div.time['datetime']) + datetime.timedelta(hours=10)
+            except:
+                dt = datetime.datetime.now()
 
-        if not NewsItem.query.filter_by(link=link).first():
-            news_item = NewsItem(website='TechCrunch', headline=headline, summary=summary, link=link, publish_time=dt)
-            db.session.add(news_item)
-            db.session.commit()
+            if not NewsItem.query.filter_by(link=link).first():
+                news_item = NewsItem(website='TechCrunch', headline=headline, summary=summary, link=link, publish_time=dt)
+                db.session.add(news_item)
+                db.session.commit()
+        except Exception as e:
+            print(e)
 
 
 def scrape_bbc_news():
@@ -118,15 +121,18 @@ def scrape_ynet_primary_articles(html):
     news_items = []
 
     for article in primary_articles:
-        headline = article.div.find(attrs={'class': 'cwide'}).a.div.div.string
-        summary = article.div.find(attrs={'class': 'cwide'}).a.div.find_all('div')[1].string
-        link = article.div.find(attrs={'class': 'cwide'}).a['href'].replace('#autoplay', '')
-        if 'ynet.co' not in link:
-            link = 'https://www.ynet.co.il' + link
-        publish_time = get_ynet_article_date(link)
+        try:
+            headline = article.div.find(attrs={'class': 'cwide'}).a.div.div.string
+            summary = article.div.find(attrs={'class': 'cwide'}).a.div.find_all('div')[1].string
+            link = article.div.find(attrs={'class': 'cwide'}).a['href'].replace('#autoplay', '')
+            if 'ynet.co' not in link:
+                link = 'https://www.ynet.co.il' + link
+            publish_time = get_ynet_article_date(link)
 
-        news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
-        news_items.append(news_item)
+            news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
+            news_items.append(news_item)
+        except Exception as e:
+            print(e)
 
     return news_items
 
@@ -137,16 +143,19 @@ def scrape_ynet_secondary_articles(html):
     news_items = []
 
     for article in secondary:
-        link = article.a['href'].replace('#autoplay', '')
-        if 'ynet.co' not in link:
-            link = 'https://www.ynet.co.il' + link
-        # headline = article.div.a.div.string
-        headline = article.div.a.find_all('div')[1].string
-        summary = ''
-        publish_time = get_ynet_article_date(link)
+        try:
+            link = article.a['href'].replace('#autoplay', '')
+            if 'ynet.co' not in link:
+                link = 'https://www.ynet.co.il' + link
+            # headline = article.div.a.div.string
+            headline = article.div.a.find_all('div')[1].string
+            summary = ''
+            publish_time = get_ynet_article_date(link)
 
-        news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
-        news_items.append(news_item)
+            news_item = NewsItem(website='ynet', headline=headline, summary=summary, link=link, publish_time=publish_time)
+            news_items.append(news_item)
+        except Exception as e:
+            print(e)
 
     return news_items
 
@@ -154,7 +163,11 @@ def scrape_ynet_secondary_articles(html):
 def scrape_ynet():
     res = requests.get('https://www.ynet.co.il/home/0,7340,L-8,00.html')
     html = BeautifulSoup(res.text, 'html.parser')
-    news_items = [scrape_ynet_main_article(html)]
+    try:
+        news_items = [scrape_ynet_main_article(html)]
+    except Exception as e:
+        print(e)
+        news_items = []
     news_items.extend(scrape_ynet_primary_articles(html))
     news_items.extend(scrape_ynet_secondary_articles(html))
 
