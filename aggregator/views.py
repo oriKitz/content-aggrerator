@@ -41,7 +41,8 @@ def get_data(text_limit, use_regex):
 
 
 @app.route("/register", methods=['GET', 'POST'])
-def register():
+@app.route("/register-page", methods=['GET', 'POST'])
+def register_page():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = RegistrationForm()
@@ -51,12 +52,13 @@ def register():
         db.session.add(user)
         db.session.commit()
         flash('Your account has been created! You are now able to log in', 'success')
-        return redirect(url_for('login'))
+        return redirect(url_for('login_page'))
     return render_template('register.html', title='Register', form=form)
 
 
 @app.route("/login", methods=['GET', 'POST'])
-def login():
+@app.route("/login-page", methods=['GET', 'POST']) # Use that so flask-security doesn't fuck you up
+def login_page():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
