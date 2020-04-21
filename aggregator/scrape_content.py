@@ -21,7 +21,7 @@ def events_listener(event):
 
 def scrape():
     scheduler = BackgroundScheduler()
-    soon = datetime.datetime.now() + datetime.timedelta(seconds=5)
+    soon = datetime.datetime.now() + datetime.timedelta(seconds=60)
     scheduler.add_job(scrape_bbc_news, 'interval', minutes=15, id='bbc_scraper', next_run_time=soon)
     scheduler.add_job(scrape_techcrunch_items, 'interval', minutes=15, id='techcrunch_scraper', next_run_time=soon)
     scheduler.add_job(scrape_ynet, 'interval', minutes=15, id='ynet_scraper', next_run_time=soon)
